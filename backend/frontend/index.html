@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Welcome | TODOLER</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(-45deg, #0d1b2a, #1b263b, #415a77, #778da9);
+        background-size: 400% 400%;
+        animation: gradientFlow 15s ease infinite;
+      }
+
+      @keyframes gradientFlow {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      #welcome-box {
+        background: rgba(224, 225, 221, 0.08);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 20px;
+        padding: 50px 70px;
+        text-align: center;
+        color: #e0e1dd;
+        box-shadow: 0 0 30px rgba(65, 90, 119, 0.4);
+        animation: fadeIn 1.2s ease-in-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      #welcome-box h1 {
+        font-size: 36px;
+        margin-bottom: 30px;
+        color: #e0e1dd;
+        letter-spacing: 1px;
+      }
+
+      .button-row {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+      }
+
+      .button-row a {
+        text-decoration: none;
+        color: #e0e1dd;
+        background-color: #415a77;
+        padding: 12px 26px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+      }
+
+      .button-row a:hover {
+        background-color: transparent;
+        border: 2px solid #e0e1dd;
+        transform: scale(1.05);
+      }
+
+      .button-row span {
+        color: #e0e1dd;
+        font-size: 18px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="welcome-box">
+      <h1>WELCOME to TODOLER!</h1>
+      <div class="button-row">
+        <a href="/signup.html">Signup</a>
+        <span>|</span>
+        <a href="/signin.html">Signin</a>
+      </div>
+    </div>
+  </body>
+</html>

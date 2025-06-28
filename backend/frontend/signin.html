@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Signin | TODOLER</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        height: 100vh;
+        background: linear-gradient(-45deg, #0d1b2a, #1b263b, #415a77, #778da9);
+        background-size: 400% 400%;
+        animation: gradientFlow 15s ease infinite;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: "Poppins", sans-serif;
+      }
+
+      @keyframes gradientFlow {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      .signin-box {
+        background: rgba(224, 225, 221, 0.08);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 20px;
+        padding: 40px 50px;
+        text-align: center;
+        color: #e0e1dd;
+        box-shadow: 0 0 25px rgba(65, 90, 119, 0.4);
+        width: 350px;
+        animation: fadeIn 1s ease-in-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .signin-box h2 {
+        margin-bottom: 25px;
+        font-size: 28px;
+      }
+
+      .signin-box input {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 15px;
+        border: none;
+        border-radius: 8px;
+        background-color: #e0e1dd;
+        font-size: 14px;
+      }
+
+      .signin-box button {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        background-color: #415a77;
+        color: #e0e1dd;
+        font-weight: 600;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .signin-box button:hover {
+        background-color: #1b263b;
+        transform: scale(1.03);
+      }
+
+      .signin-box a {
+        display: inline-block;
+        margin-top: 15px;
+        color: #e0e1dd;
+        text-decoration: underline;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="signin-box">
+      <h2>Signin</h2>
+      <form onsubmit="signin(event)">
+        <input id="signin-username" placeholder="Username" required />
+        <input
+          id="signin-password"
+          type="password"
+          placeholder="Password"
+          required
+        />
+        <button type="submit">Signin</button>
+      </form>
+      <a href="/">← Back to Home</a>
+    </div>
+
+    <script>
+      async function signin(event) {
+        event.preventDefault();
+
+        const username = document.getElementById("signin-username").value;
+        const password = document.getElementById("signin-password").value;
+
+        try {
+          const response = await axios.post("http://localhost:3000/signin", {
+            username,
+            password,
+          });
+
+          localStorage.setItem("token", response.data.token);
+          alert("Signed in successfully");
+          window.location.href = "/home.html";
+        } catch (err) {
+          alert("Signin failed. " + (err.response?.data || ""));
+          console.error(err);
+        }
+      }
+    </script>
+  </body>
+</html>

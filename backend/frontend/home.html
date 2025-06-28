@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>TODOLER - Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        height: 100vh;
+        background: linear-gradient(-45deg, #0d1b2a, #1b263b, #415a77, #778da9);
+        background-size: 400% 400%;
+        animation: gradientFlow 15s ease infinite;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: "Poppins", sans-serif;
+        color: #e0e1dd;
+      }
+
+      @keyframes gradientFlow {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      .container {
+        background: rgba(224, 225, 221, 0.08);
+        backdrop-filter: blur(12px);
+        padding: 40px;
+        border-radius: 20px;
+        width: 400px;
+        box-shadow: 0 0 25px rgba(65, 90, 119, 0.4);
+        position: relative;
+        animation: fadeIn 1s ease-in-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      h2 {
+        text-align: center;
+        margin-bottom: 25px;
+      }
+
+      input {
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        border: none;
+        margin-bottom: 15px;
+        font-size: 14px;
+        background-color: #e0e1dd;
+        color: #1b263b;
+      }
+
+      button {
+        padding: 10px 16px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.3s ease;
+      }
+
+      #add-btn {
+        background-color: #415a77;
+        color: #e0e1dd;
+        width: 100%;
+        margin-bottom: 20px;
+      }
+
+      #add-btn:hover {
+        background-color: #1b263b;
+      }
+
+      .todo-item {
+        background-color: rgba(255, 255, 255, 0.05);
+        padding: 10px;
+        border-radius: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .todo-item span {
+        flex-grow: 1;
+      }
+
+      .todo-item.done span {
+        text-decoration: line-through;
+        color: #bbb;
+      }
+
+      .todo-item button {
+        margin-left: 8px;
+        background-color: #e0e1dd;
+        color: #1b263b;
+      }
+
+      .todo-item button:hover {
+        background-color: #778da9;
+        color: white;
+      }
+
+      #logout-btn {
+        position: fixed; /* instead of absolute */
+        top: 20px;
+        right: 20px;
+        background-color: #e63946;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.3s ease;
+        z-index: 999;
+      }
+
+      #logout-btn:hover {
+        background-color: #b30d2f;
+      }
+    </style>
+  </head>
+
+  <body>
+    <button id="logout-btn" onclick="logout()">Logout</button>
+    <div class="container">
+      <h2>Welcome to TODOLER</h2>
+
+      <input id="todo-input" placeholder="Enter a todo..." />
+      <button id="add-btn">Add Todo</button>
+
+      <div id="todo-list"></div>
+    </div>
+
+    <script>
+      const token = localStorage.getItem("token");
+      if (!token) {
+        window.location.href = "/signin.html";
+      }
+
+      document.getElementById("add-btn").onclick = async () => {
+        const input = document.getElementById("todo-input");
+        const todo = input.value.trim();
+        if (todo === "") return;
+
+        try {
+          await axios.post("/api/todos", { todo }, { headers: { token } });
+          input.value = "";
+          fetchTodos();
+        } catch (err) {
+          alert("Failed to add todo");
+        }
+      };
+
+      async function fetchTodos() {
+        try {
+          const res = await axios.get("/api/todos", {
+            headers: { token },
+          });
+
+          const todos = res.data;
+          const listDiv = document.getElementById("todo-list");
+          listDiv.innerHTML = "";
+
+          todos.forEach((t, i) => {
+            const div = document.createElement("div");
+            div.className = "todo-item" + (t.done ? " done" : "");
+
+            const span = document.createElement("span");
+            span.textContent = t.text;
+
+            const checkBtn = document.createElement("button");
+            checkBtn.textContent = t.done ? "Uncheck" : "Check";
+            checkBtn.onclick = async () => {
+              await axios.put(`/api/todos/${i}`, {}, { headers: { token } });
+              fetchTodos();
+            };
+
+            const delBtn = document.createElement("button");
+            delBtn.textContent = "Delete";
+            delBtn.onclick = async () => {
+              await axios.delete(`/api/todos/${i}`, { headers: { token } });
+              fetchTodos();
+            };
+
+            div.appendChild(span);
+            div.appendChild(checkBtn);
+            div.appendChild(delBtn);
+            listDiv.appendChild(div);
+          });
+        } catch (err) {
+          alert("Failed to fetch todos");
+          console.error(err);
+        }
+      }
+
+      function logout() {
+        localStorage.removeItem("token");
+        window.location.href = "/";
+      }
+
+      window.onload = fetchTodos;
+    </script>
+  </body>
+</html>
