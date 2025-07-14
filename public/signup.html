@@ -3,11 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Todo app</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
-      rel="stylesheet"
-    />
+    <title>Signup | TODOLER</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.min.js"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
       rel="stylesheet"
@@ -109,34 +106,13 @@
     </style>
   </head>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.min.js"></script>
-  <!-- <script>
-    async function signup() {
-      try {
-        const username = document.getElementById("signup-username").value;
-        const password = document.getElementById("signup-password").value;
-
-        const response = await axios.post("http://localhost:3000/signup", {
-          username: username,
-          password: password,
-        });
-        alert("Signed up successfully");
-        document.getElementById("signup-section").style.display = "none";
-        document.getElementById("signin-section").style.display = "block;";
-        document.getElementById("user-section").style.display = "block";
-      } catch {
-        alert("Signup failed");
-        console.error(err);
-      }
-    }
-  </script> -->
   <body>
     <div class="signup-box">
       <h2>Signup</h2>
-      <form action="/signup" method="POST">
-        <input name="username" placeholder="Username" required />
+      <form onsubmit="signup(event)">
+        <input id="signup-username" placeholder="Username" required />
         <input
-          name="password"
+          id="signup-password"
           type="password"
           placeholder="Password"
           required
@@ -145,5 +121,29 @@
       </form>
       <a href="/">← Back to Home</a>
     </div>
+
+    <script>
+      async function signup(event) {
+        event.preventDefault();
+
+        const username = document.getElementById("signup-username").value;
+        const password = document.getElementById("signup-password").value;
+
+        try {
+          const response = await axios.post("/signup", {
+            username,
+            password,
+          });
+
+          alert("Signed up successfully");
+          // Optional: Log them in immediately
+          localStorage.setItem("token", response.data.token);
+          window.location.href = "/home.html";
+        } catch (err) {
+          alert("Signup failed. " + (err.response?.data || ""));
+          console.error(err);
+        }
+      }
+    </script>
   </body>
 </html>

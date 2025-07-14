@@ -2,16 +2,14 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const path = require("path");
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const JWT_SECRET = "random-secret-key";
 
 let users = [];
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Serve static files from root
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, "public")));
 
 // Logger middleware
 function logger(req, res, next) {
@@ -21,10 +19,10 @@ function logger(req, res, next) {
 
 // Home route
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// Signup Route
+// Signup route
 app.post("/signup", logger, (req, res) => {
   const { username, password } = req.body;
 
@@ -34,13 +32,13 @@ app.post("/signup", logger, (req, res) => {
   }
 
   const token = jwt.sign({ username }, JWT_SECRET);
-  users.push({ username, password, token, todos: [] });
+  users.push({ username, password, todos: [] });
 
   console.log("User signed up:", username);
-  res.redirect("/index.html");
+  res.json({ token });
 });
 
-// Signin Route – with token match
+// Signin route
 app.post("/signin", logger, (req, res) => {
   const { username, password } = req.body;
 
@@ -48,21 +46,14 @@ app.post("/signin", logger, (req, res) => {
     (user) => user.username === username && user.password === password
   );
 
-  if (foundUser) {
-    try {
-      const decoded = jwt.verify(foundUser.token, JWT_SECRET);
-      if (decoded.username === username) {
-        console.log("Token verified & signin success:", username);
-        return res.json({ token: foundUser.token });
-      } else {
-        return res.status(403).send("Token mismatch");
-      }
-    } catch (err) {
-      return res.status(401).send("Invalid token");
-    }
-  } else {
-    res.status(401).send("Invalid username or password");
+  if (!foundUser) {
+    return res.status(401).send("Invalid username or password");
   }
+
+  const token = jwt.sign({ username }, JWT_SECRET);
+  foundUser.token = token; // Optionally update stored token
+  console.log("Signin success:", username);
+  res.json({ token });
 });
 
 // Auth middleware
@@ -82,6 +73,7 @@ function auth(req, res, next) {
 // Get Todos
 app.get("/api/todos", auth, (req, res) => {
   const user = users.find((u) => u.username === req.username);
+  if (!user) return res.status(404).json({ msg: "User not found" });
   res.json(user.todos);
 });
 
@@ -89,24 +81,30 @@ app.get("/api/todos", auth, (req, res) => {
 app.post("/api/todos", auth, (req, res) => {
   const { todo } = req.body;
   const user = users.find((u) => u.username === req.username);
+  if (!user) return res.status(404).json({ msg: "User not found" });
+
   user.todos.push({ text: todo, done: false });
   res.json(user.todos);
 });
 
 // Toggle Done
 app.put("/api/todos/:index", auth, (req, res) => {
-  const index = req.params.index;
+  const index = parseInt(req.params.index);
   const user = users.find((u) => u.username === req.username);
-  if (user.todos[index]) {
-    user.todos[index].done = !user.todos[index].done;
-    res.json(user.todos);
-  }
+  if (!user || !user.todos[index])
+    return res.status(404).json({ msg: "Todo not found" });
+
+  user.todos[index].done = !user.todos[index].done;
+  res.json(user.todos);
 });
 
 // Delete Todo
 app.delete("/api/todos/:index", auth, (req, res) => {
-  const index = req.params.index;
+  const index = parseInt(req.params.index);
   const user = users.find((u) => u.username === req.username);
+  if (!user || !user.todos[index])
+    return res.status(404).json({ msg: "Todo not found" });
+
   user.todos.splice(index, 1);
   res.json(user.todos);
 });
